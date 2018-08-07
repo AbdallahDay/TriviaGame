@@ -1,0 +1,25 @@
+body {
+    text-align: center;
+}
+
+div#ClickStart {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: #ffffff;
+}
+
+ul#Options {
+    list-style: none;
+    padding: 0;
+}
+
+.answer-option {
+    color: #000000;
+}
+
+.answer-option.selected {
+    color: #00cc00;
+}
