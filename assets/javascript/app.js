@@ -3,6 +3,9 @@ var game = {
     currentQuestion: {},
     secondsRemaining: 30,
     countdownTimer: null,
+    correct: 0,
+    incorrect: 0,
+    missed: 0,
 
     AddQAObject: function (nameStr, questionStr, trueAnswerStr, falseAnswersArr) {
         var obj = {
@@ -46,6 +49,10 @@ var game = {
     },
 
     Initialize: function () {
+
+        $("#gameOver").hide();
+        $("#game").show();
+
         game.questionsArr = [];
         //Add all Q/A objects here using AddQAObject function
         game.AddQAObject("question1", "question1", "answer", ["not answer", "not answer", "not answer"]);
@@ -54,49 +61,64 @@ var game = {
         game.AddQAObject("question4", "question4", "answer", ["not answer", "not answer", "not answer"]);
         game.AddQAObject("question5", "question5", "answer", ["not answer", "not answer", "not answer"]);
         //...
+        
+        $("#ClickStart").hide();
+        game.NextQuestion();
+
     },
 
     NextQuestion: function () {
-        //get a random question for the user to answer next
-        const rnd = Math.floor(Math.random() * this.questionsArr.length);
-        this.currentQuestion = this.questionsArr[rnd];
-        this.questionsArr.splice(rnd, 1);
+        if (this.questionsArr.length) {
+            //get a random question for the user to answer next
+            const rnd = Math.floor(Math.random() * this.questionsArr.length);
+            this.currentQuestion = this.questionsArr[rnd];
+            this.questionsArr.splice(rnd, 1);
 
-        //display question
-        $("#Question").text(this.currentQuestion.question);
+            //display question
+            $("#Question").text(this.currentQuestion.question);
 
-        console.log(this.currentQuestion);//DEBUG
-        //display answer options
-        $("#Options").empty();
-        for (var i = 0; i < this.currentQuestion.shuffledAnswers.length; i++) {
-            var li = $(`<li class="answer-option">${this.currentQuestion.shuffledAnswers[i]}</li>`);
-            $("#Options").append(li);
-        }
-
-        //start countdownTimer
-        this.secondsRemaining = 30;
-        $("#TimeRemaining").text(this.secondsRemaining);
-        
-        this.countdownTimer = setInterval(function () {
-            game.secondsRemaining--;
-            console.log(game.secondsRemaining);//DEBUG
-            $("#TimeRemaining").text(game.secondsRemaining);
-    
-            if (game.secondsRemaining <= 0) {
-                //Time's up
-                game.secondsRemaining = 0;
-                $("#TimeRemaining").text(game.secondsRemaining);
-    
-                clearInterval(game.countdownTimer);
-                game.NextQuestion();
+            console.log(this.currentQuestion);//DEBUG
+            //display answer options
+            $("#Options").empty();
+            for (var i = 0; i < this.currentQuestion.shuffledAnswers.length; i++) {
+                var li = $(`<li class="answer-option">${this.currentQuestion.shuffledAnswers[i]}</li>`);
+                $("#Options").append(li);
             }
-        }, 1000);
+
+            //start countdownTimer
+            this.secondsRemaining = 30;
+            $("#TimeRemaining").text(this.secondsRemaining);
+            
+            this.countdownTimer = setInterval(function () {
+                game.secondsRemaining--;
+                console.log(game.secondsRemaining);//DEBUG
+                $("#TimeRemaining").text(game.secondsRemaining);
+        
+                if (game.secondsRemaining <= 0) {
+                    //Time's up
+                    game.secondsRemaining = 0;
+                    $("#TimeRemaining").text(game.secondsRemaining);
+
+                    //not submitted = missed
+                    game.missed++;
+        
+                    clearInterval(game.countdownTimer);
+                    game.NextQuestion();
+                }
+            }, 1000);
+        } else {
+            //no questions left
+            clearInterval(game.countdownTimer);
+            
+            $("#game").hide();
+            $("#gameOver").show();
+        }
     }
 };
 
 $(document).ready(function() {
 
-    game.Initialize();
+    $("#ClickStart").on("click", game.Initialize);
 
     $("#Options").on("click", ".answer-option", function() {
         console.log(`${$(this).text()} clicked`);
@@ -104,9 +126,30 @@ $(document).ready(function() {
         $(this).addClass("selected");
     });
 
-    $("#ClickStart").on("click", function() {
-        $("#ClickStart").hide();
-        game.NextQuestion();
+    $("#btnSubmit").on("click", function() {
+        clearInterval(game.countdownTimer);
+        if ($(".answer-option.selected").length) {
+            var answerStr = $(".answer-option.selected").text();
+
+            if (game.currentQuestion.trueAnswer === answerStr) {
+                //correct
+                game.correct++;
+                console.log(`correct: ${game.correct}`);//DEBUG
+            } else {
+                //incorrect
+                game.incorrect++;
+                console.log(`incorrect: ${game.incorrect}`);//DEBUG
+            }
+        } else {
+            //missed
+            game.missed++;
+            console.log(`missed: ${game.missed}`);//DEBUG
+        }
+        //display result for 5 seconds
+        setTimeout(function() {
+            //TODO
+            game.NextQuestion();
+        }, 5000);
     });
 
 });

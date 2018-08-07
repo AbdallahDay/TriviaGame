@@ -22,13 +22,44 @@
             <h2>Click anywhere to start!</h2>
         </div>
 
-        <h1 id="Title">Trivia</h1>
+        <div class="container">
+            <div class="row">
+                <h1 id="Title">Trivia</h1>
+            </div>
 
-        <h3>Time Remaining: <span  id="TimeRemaining"></span> Seconds</h3>
+            <div id="game" class="container">
+                    
+                <div class="row">
+                    <h3>Time Remaining: <span  id="TimeRemaining"></span> Seconds</h3>
+                </div>
 
-        <h2 id="Question"></h2>
+                <div class="row">
+                    <h2 id="Question"></h2>
+                    <ul id="Options"></ul>
+                </div>
 
-        <ul id="Options"></ul>
+                <div class="row">
+                    <button id="btnSubmit" class="button">Submit</button>                
+                </div>
+
+            </div>
+
+            <div id="gameOver" class="container">
+                <div class="row">
+                    <h2>All done! Here's how you did:</h2>
+                </div>
+
+                <div class="row">
+                    <h3 id="correctAnswers"></h3>
+                    <h3 id="incorrectAnswers"></h3>
+                    <h3 id="unanswered"></h3>
+                </div>
+                
+                <div class="row">
+                    <h2>Start Over?</h2>
+                </div>
+            </div>
+        </div>
 
         <script src="assets/javascript/app.js"></script>
     </body>
