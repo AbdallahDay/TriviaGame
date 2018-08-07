@@ -46,18 +46,14 @@ var game = {
     },
 
     Initialize: function () {
-        this.questionsArr = [];
-
+        game.questionsArr = [];
         //Add all Q/A objects here using AddQAObject function
-        this.AddQAObject("question1", "question1", "answer", ["not answer", "not answer", "not answer"]);
-        this.AddQAObject("question2", "question2", "answer", ["not answer", "not answer", "not answer"]);
-        this.AddQAObject("question3", "question3", "answer", ["not answer", "not answer", "not answer"]);
-        this.AddQAObject("question4", "question4", "answer", ["not answer", "not answer", "not answer"]);
-        this.AddQAObject("question5", "question5", "answer", ["not answer", "not answer", "not answer"]);
+        game.AddQAObject("question1", "question1", "answer", ["not answer", "not answer", "not answer"]);
+        game.AddQAObject("question2", "question2", "answer", ["not answer", "not answer", "not answer"]);
+        game.AddQAObject("question3", "question3", "answer", ["not answer", "not answer", "not answer"]);
+        game.AddQAObject("question4", "question4", "answer", ["not answer", "not answer", "not answer"]);
+        game.AddQAObject("question5", "question5", "answer", ["not answer", "not answer", "not answer"]);
         //...
-
-        $("#ClickStart").hide();
-        this.NextQuestion();
     },
 
     NextQuestion: function () {
@@ -100,13 +96,17 @@ var game = {
 
 $(document).ready(function() {
 
+    game.Initialize();
+
     $("#Options").on("click", ".answer-option", function() {
         console.log(`${$(this).text()} clicked`);
         $(".answer-option").removeClass("selected");
         $(this).addClass("selected");
     });
 
-    $("#ClickStart").click(function() {
-        game.Initialize();
+    $("#ClickStart").on("click", function() {
+        $("#ClickStart").hide();
+        game.NextQuestion();
     });
+
 });
