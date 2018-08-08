@@ -7,19 +7,19 @@ var game = {
     incorrect: 0,
     missed: 0,
 
-    AddQAObject: function (nameStr, questionStr, trueAnswerStr, falseAnswersArr) {
+    AddQAObject: function (questionStr, trueAnswerStr, falseAnswersArr, imageUrl) {
         var obj = {
-            name: "",
             question: "",
             trueAnswer: "",
             falseAnswers: [],
-            shuffledAnswers: []
+            shuffledAnswers: [],
+            img_url: ""
         };
 
-        obj.name = nameStr;
         obj.question = questionStr;
         obj.trueAnswer = trueAnswerStr;
         obj.falseAnswers = falseAnswersArr;
+        obj.img_url = imageUrl;
         
         var arr = Array.from(falseAnswersArr);
         arr.push(obj.trueAnswer);
@@ -50,46 +50,67 @@ var game = {
 
     Initialize: function () {
 
-        $("#gameOver").hide();
-        $("#game").show();
-
         game.questionsArr = [];
         //Add all Q/A objects here using AddQAObject function
-        game.AddQAObject("question1", "question1", "answer", ["not answer", "not answer", "not answer"]);
-        game.AddQAObject("question2", "question2", "answer", ["not answer", "not answer", "not answer"]);
-        game.AddQAObject("question3", "question3", "answer", ["not answer", "not answer", "not answer"]);
-        game.AddQAObject("question4", "question4", "answer", ["not answer", "not answer", "not answer"]);
-        game.AddQAObject("question5", "question5", "answer", ["not answer", "not answer", "not answer"]);
-        //...
+
+        game.AddQAObject(
+            "What does Rick use to travel between dimensions and universes?",
+            "Portal Gun",
+            ["Space Laser", "Tardis", "Universe Key"],
+            "./assets/images/portal-gun.gif");
         
-        $("#ClickStart").hide();
-        game.NextQuestion();
+        game.AddQAObject(
+            "Who is Morty based on?",
+            "Marty from \"Back To The Future\"",
+            ["Frankenstein", "Hugo Strange", "Adam Webber from \"Blast From The Past\""],
+            "./assets/images/rickandmorty-backtothefuture.jpg");
+        
+        game.AddQAObject(
+            "Who are Rick's two best friends?",
+            "Birdperson and Squanchy",
+            ["Eagleperson and Scrunchy", "Beakperson and Squinchy", "Hawkperson and Sqelchy"],
+            "./assets/images/ricks-bff.gif");
+        
+        game.AddQAObject(
+            "What non-human species makes up half of Morty's son?",
+            "Gazorpazorp",
+            ["Gatarama", "Gurglenstein", "Gaflumarorp"],
+            "./assets/images/morty-jr.gif");
 
     },
 
     NextQuestion: function () {
-        if (this.questionsArr.length) {
+        $("#answerDisplay").hide();
+        if (game.questionsArr.length) {
             //get a random question for the user to answer next
-            const rnd = Math.floor(Math.random() * this.questionsArr.length);
-            this.currentQuestion = this.questionsArr[rnd];
-            this.questionsArr.splice(rnd, 1);
+            const rnd = Math.floor(Math.random() * game.questionsArr.length);
+            game.currentQuestion = game.questionsArr[rnd];
+            game.questionsArr.splice(rnd, 1);
+
+            $("#resultAnswer").text(`The correct answer was: ${game.currentQuestion.trueAnswer}`);
+            $("#resultImage").attr({
+                src: game.currentQuestion.img_url,//TODO
+                alt: game.currentQuestion.trueAnswer
+            });
 
             //display question
-            $("#Question").text(this.currentQuestion.question);
+            $("#Question").text(game.currentQuestion.question);
 
-            console.log(this.currentQuestion);//DEBUG
+            console.log(game.currentQuestion);//DEBUG
             //display answer options
             $("#Options").empty();
-            for (var i = 0; i < this.currentQuestion.shuffledAnswers.length; i++) {
-                var li = $(`<li class="answer-option">${this.currentQuestion.shuffledAnswers[i]}</li>`);
+            for (var i = 0; i < game.currentQuestion.shuffledAnswers.length; i++) {
+                var li = $(`<li class="answer-option">${game.currentQuestion.shuffledAnswers[i]}</li>`);
                 $("#Options").append(li);
             }
 
+            $("#btnSubmit").removeClass("disabled");
+
             //start countdownTimer
-            this.secondsRemaining = 30;
-            $("#TimeRemaining").text(this.secondsRemaining);
+            game.secondsRemaining = 30;
+            $("#TimeRemaining").text(game.secondsRemaining);
             
-            this.countdownTimer = setInterval(function () {
+            game.countdownTimer = setInterval(function () {
                 game.secondsRemaining--;
                 console.log(game.secondsRemaining);//DEBUG
                 $("#TimeRemaining").text(game.secondsRemaining);
@@ -101,6 +122,8 @@ var game = {
 
                     //not submitted = missed
                     game.missed++;
+                    $("#resultTitle").text("Out of Time!");
+                    $("#answerDisplay").show();
         
                     clearInterval(game.countdownTimer);
                     game.NextQuestion();
@@ -110,6 +133,13 @@ var game = {
             //no questions left
             clearInterval(game.countdownTimer);
             
+            //correctAnswers
+            $("#correctAnswers").text(game.correct);
+            //incorrectAnswers
+            $("#incorrectAnswers").text(game.incorrect);
+            //unanswered
+            $("#unanswered").text(game.missed);
+
             $("#game").hide();
             $("#gameOver").show();
         }
@@ -118,7 +148,16 @@ var game = {
 
 $(document).ready(function() {
 
-    $("#ClickStart").on("click", game.Initialize);
+    $("#answerDisplay").hide();
+    $("#gameOver").hide();
+    $("#game").show();
+
+    game.Initialize();
+
+    $("#ClickStart").on("click", function() {
+        $("#ClickStart").hide();
+        game.NextQuestion();
+    });
 
     $("#Options").on("click", ".answer-option", function() {
         console.log(`${$(this).text()} clicked`);
@@ -127,29 +166,42 @@ $(document).ready(function() {
     });
 
     $("#btnSubmit").on("click", function() {
-        clearInterval(game.countdownTimer);
-        if ($(".answer-option.selected").length) {
-            var answerStr = $(".answer-option.selected").text();
+        if (!$("#btnSubmit").hasClass("disabled")) {
+            $("#btnSubmit").addClass("disabled");
+            clearInterval(game.countdownTimer);
+            if ($(".answer-option.selected").length) {
+                var answerStr = $(".answer-option.selected").text();
 
-            if (game.currentQuestion.trueAnswer === answerStr) {
-                //correct
-                game.correct++;
-                console.log(`correct: ${game.correct}`);//DEBUG
+                if (game.currentQuestion.trueAnswer === answerStr) {
+                    //correct
+                    game.correct++;
+                    $("#resultTitle").text("Correct!");
+                } else {
+                    //incorrect
+                    game.incorrect++;
+                    $("#resultTitle").text("Wrong!");
+                }
             } else {
-                //incorrect
-                game.incorrect++;
-                console.log(`incorrect: ${game.incorrect}`);//DEBUG
+                //missed
+                game.missed++;
             }
-        } else {
-            //missed
-            game.missed++;
-            console.log(`missed: ${game.missed}`);//DEBUG
+
+            //display result for 5 seconds
+            $("#answerDisplay").show();
+
+            setTimeout(game.NextQuestion, 5000);
         }
-        //display result for 5 seconds
-        setTimeout(function() {
-            //TODO
-            game.NextQuestion();
-        }, 5000);
+    });
+
+    $("#btnStartOver").on("click", function() {
+        $("#gameOver").hide();
+        $("#game").show();
+
+        game.correct = 0;
+        game.incorrect = 0;
+        game.missed = 0;
+        game.Initialize();
+        game.NextQuestion();
     });
 
 });
