@@ -24,23 +24,13 @@ var game = {
         var arr = Array.from(falseAnswersArr);
         arr.push(obj.trueAnswer);
         
-        console.log(`arr: ${arr}`);//DEBUG
-
         var newArr = [];
 
-        console.log(`newArr: ${newArr}`)//DEBUG
-        count = 0;//DEBUG
         while (arr.length > 0) {
-            count++;//DEBUG
-            console.log(`attempt #${count}`);//DEBUG
             var i = Math.floor(Math.random() * arr.length);
-            console.log(`chosen arr[${i}/${arr.length}]: ${arr[i]}`);//DEBUG
-            
+
             newArr.push(arr[i]);
             arr.splice(i, 1);
-
-            console.log(`arr: ${arr}`);//DEBUG
-            console.log(`newArr: ${newArr}`);//DEBUG
         }
 
         obj.shuffledAnswers = Array.from(newArr);
@@ -89,14 +79,13 @@ var game = {
 
             $("#resultAnswer").text(`The correct answer was: ${game.currentQuestion.trueAnswer}`);
             $("#resultImage").attr({
-                src: game.currentQuestion.img_url,//TODO
+                src: game.currentQuestion.img_url,
                 alt: game.currentQuestion.trueAnswer
             });
 
             //display question
             $("#Question").text(game.currentQuestion.question);
 
-            console.log(game.currentQuestion);//DEBUG
             //display answer options
             $("#Options").empty();
             for (var i = 0; i < game.currentQuestion.shuffledAnswers.length; i++) {
@@ -112,7 +101,7 @@ var game = {
             
             game.countdownTimer = setInterval(function () {
                 game.secondsRemaining--;
-                console.log(game.secondsRemaining);//DEBUG
+    
                 $("#TimeRemaining").text(game.secondsRemaining);
         
                 if (game.secondsRemaining <= 0) {
